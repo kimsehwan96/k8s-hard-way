@@ -1,0 +1,29 @@
+# HashiCorp Packer
+## Ignore cache directories.
+packer_cache/
+## Ignore crash log files.
+crash.log
+
+# MacOS
+## Ignore desktop services files.
+**/.DS_Store
+
+# Artifacts
+## Ignore artifacts directory.
+**/artifacts/**/*.mf
+**/artifacts/**/*.nvram
+**/artifacts/**/*.ovf
+**/artifacts/**/*.vmdk
+**/artifacts/**/*.vmx
+**/artifacts/**/*.vmxf
+**/artifacts/**/*.vmsd
+
+# Manifests
+## Ignore manifests directory.
+**/manifests/*.json
+
+# certs files
+certs/provisioning/*.crt
+certs/provisioning/*.csr
+certs/provisioning/*.key
+certs/provisioning/*.kubeconfig

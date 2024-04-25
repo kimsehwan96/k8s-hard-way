@@ -1,0 +1,18 @@
+[Unit]
+Description=Kubernetes Kubelet Server
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+After=containerd.service
+Wants=containerd.service
+
+[Service]
+ExecStart=/usr/local/bin/kubelet \
+  --config=/etc/kubernetes/kubelet-config.yaml \
+  --kubeconfig=/etc/kubernetes/kubelet.kubeconfig \
+  --register-node=true \
+  --v=2
+Restart=always
+RestartSec=10s
+
+
+[Install]
+WantedBy=multi-user.target

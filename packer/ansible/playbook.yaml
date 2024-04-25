@@ -1,0 +1,39 @@
+- name: 필수 패키지 설치, 스왑 off , 커널 파라미터 설정, 방화벽 설정 등 기본적인 설정
+  hosts: 127.0.0.1
+  connection: local
+  become: true
+  become_user: root
+  roles:
+    - { role: prepare }
+  vars:
+    ansible_user: admin
+    ansible_password: admin
+    ansible_become_password: admin
+
+- name: 컨테이너 런타임 설치
+  hosts: 127.0.0.1
+  connection: local
+  become: true
+  become_user: root
+  roles:
+    - { role: defaults }
+    - { role: container-runtime }
+  vars:
+    ansible_user: admin
+    ansible_password: admin
+    ansible_become_password: admin
+
+
+- name: 쿠버네티스 바이너리 설치
+  hosts: 127.0.0.1
+  connection: local
+  become: true
+  become_user: root
+  roles:
+    - { role: defaults }
+    - { role: kubernetes }
+  vars:
+    ansible_user: admin
+    ansible_password: admin
+    ansible_become_password: admin
+    hostip: "{{ ansible_host }}"

@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    component: kube-apiserver
+    tier: control-plane
+  name: kube-apiserver
+  namespace: kube-system
+spec:
+  containers:
+  - command:
+    - kube-apiserver
+    - --advertise-address=172.16.73.143
+    - --audit-log-path=/var/log/audit.log
+    - --allow-privileged=true
+    - --anonymous-auth=True
+    - --apiserver-count=1
+    - --authorization-mode=Node,RBAC
+    - --bind-address=0.0.0.0
+    - --client-ca-file=/etc/kubernetes/ssl/ca.crt
+    - --default-not-ready-toleration-seconds=300
+    - --default-unreachable-toleration-seconds=300
+    - --secure-port=6443
+    - --enable-admission-plugins=NodeRestriction
+    - --enable-aggregator-routing=False
+    - --etcd-compaction-interval=5m0s
+    - --etcd-servers=http://127.0.0.1:2379
+    - --event-ttl=1h0m0s
+    - --kubelet-certificate-authority=/etc/kubernetes/ssl/ca.crt
+    - --kubelet-client-certificate=/etc/kubernetes/ssl/apiserver.crt
+    - --kubelet-client-key=/etc/kubernetes/ssl/apiserver.key
+    - --kubelet-preferred-address-types=InternalDNS,InternalIP,Hostname,ExternalDNS,ExternalIP
+    - --profiling=False
+    - --service-account-issuer=https://control1.kubernetes.local:6443
+    - --service-account-key-file=/etc/kubernetes/ssl/service-accounts.crt
+    - --service-account-lookup=True
+    - --service-account-signing-key-file=/etc/kubernetes/ssl/service-accounts.key
+    - --service-cluster-ip-range=10.32.0.0/24
+    - --service-node-port-range=30000-32767
+    - --storage-backend=etcd3
+    - --tls-cert-file=/etc/kubernetes/ssl/apiserver.crt
+    - --tls-private-key-file=/etc/kubernetes/ssl/apiserver.key
+    image: registry.k8s.io/kube-apiserver:v1.29.1
+    imagePullPolicy: IfNotPresent
+    livenessProbe:
+      failureThreshold: 8
+      httpGet:
+        host: 172.16.73.143
+        path: /livez
+        port: 6443
+        scheme: HTTPS
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 15
+    name: kube-apiserver
+    readinessProbe:
+      failureThreshold: 3
+      httpGet:
+        host: 172.16.73.143
+        path: /readyz
+        port: 6443
+        scheme: HTTPS
+      periodSeconds: 1
+      timeoutSeconds: 15
+    resources:
+      requests:
+        cpu: 250m
+    startupProbe:
+      failureThreshold: 30
+      httpGet:
+        host: 172.16.73.143
+        path: /livez
+        port: 6443
+        scheme: HTTPS
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 15
+    volumeMounts:
+    - mountPath: /etc/kubernetes/ssl
+      name: k8s-certs
+      readOnly: true
+  hostNetwork: true
+  priority: 2000001000
+  priorityClassName: system-node-critical
+  securityContext:
+    seccompProfile:
+      type: RuntimeDefault
+  volumes:
+  - hostPath:
+      path: /etc/kubernetes/ssl
+      type: DirectoryOrCreate
+    name: k8s-certs
+status: {}
