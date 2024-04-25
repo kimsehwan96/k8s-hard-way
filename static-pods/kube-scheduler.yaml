@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    component: kube-scheduler
+    tier: control-plane
+  name: kube-scheduler
+  namespace: kube-system
+spec:
+  containers:
+  - command:
+    - kube-scheduler
+    - --authentication-kubeconfig=/etc/kubernetes/scheduler.kubeconfig
+    - --authorization-kubeconfig=/etc/kubernetes/scheduler.kubeconfig
+    - --bind-address=0.0.0.0
+    - --config=/etc/kubernetes/kubescheduler-config.yaml
+    - --kubeconfig=/etc/kubernetes/scheduler.kubeconfig
+    - --leader-elect=true
+    - --profiling=False
+    image: registry.k8s.io/kube-scheduler:v1.29.1
+    imagePullPolicy: IfNotPresent
+    livenessProbe:
+      failureThreshold: 8
+      httpGet:
+        path: /healthz
+        port: 10259
+        scheme: HTTPS
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 15
+    name: kube-scheduler
+    resources:
+      requests:
+        cpu: 100m
+    startupProbe:
+      failureThreshold: 30
+      httpGet:
+        path: /healthz
+        port: 10259
+        scheme: HTTPS
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 15
+    volumeMounts:
+    - mountPath: /etc/kubernetes/scheduler.kubeconfig
+      name: kubeconfig
+      readOnly: true
+    - mountPath: /etc/kubernetes/kubescheduler-config.yaml
+      name: kubescheduler-config
+      readOnly: true
+  hostNetwork: true
+  priority: 2000001000
+  priorityClassName: system-node-critical
+  securityContext:
+    seccompProfile:
+      type: RuntimeDefault
+  volumes:
+  - hostPath:
+      path: /etc/kubernetes/scheduler.kubeconfig
+      type: FileOrCreate
+    name: kubeconfig
+  - hostPath:
+      path: /etc/kubernetes/kubescheduler-config.yaml
+      type: ""
+    name: kubescheduler-config
+status: {}
